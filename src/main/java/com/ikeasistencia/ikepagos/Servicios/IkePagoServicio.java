@@ -5,6 +5,7 @@ import com.ikeasistencia.ikepagos.Entidades.Beneficiario;
 import com.ikeasistencia.ikepagos.Repositorios.BeneficiarioRepository;
 import com.ikeasistencia.ikepagos.Repositorios.PagoRepository;
 
+import java.nio.charset.Charset;
 import java.security.spec.KeySpec;
 import java.sql.Date;
 import java.util.Base64;
@@ -40,7 +41,7 @@ public class IkePagoServicio {
         KeySpec keySpec;
         try {
             factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-            keySpec = new PBEKeySpec(key.toCharArray(), salt.getBytes(), 65536, 256);
+            keySpec = new PBEKeySpec(key.toCharArray(), salt.getBytes(), 65536, 32);
             secretKeyTemp = factory.generateSecret(keySpec);
         } catch (Exception e) {
             e.printStackTrace();
@@ -106,24 +107,14 @@ public class IkePagoServicio {
         String id_pago = datos.get("id_pago").toString();
         String url = datos.get("url").toString();
         String preHash = cuenta_ike + id_pago;
-
         String encriptado = getAES(preHash);
-
-        System.out.println("El dato encriptado es: " + encriptado);
-
-        String desencriptado = getAESDecrypt(encriptado);
-
-        System.out.println("El dato desencriptado es: " + desencriptado);
-
-        String urlFinal = url + "checkout.php?rut="+encriptado;
-
+        String urlFinal = url + "checkout?rut="+encriptado;
         return urlFinal;
-
     }
 
     public String getAES(String data){
         byte[] iv = new byte[16];
-
+        iv = "ikeasistencia222".getBytes(Charset.defaultCharset());
         try {
             IvParameterSpec spec = new IvParameterSpec(iv);
             SecretKeySpec secretKey = new SecretKeySpec(secretKeyTemp.getEncoded(),"AES");
@@ -139,6 +130,7 @@ public class IkePagoServicio {
 
     public String getAESDecrypt(String data){
         byte[] iv = new byte[16];
+        iv = "ikeasistencia222".getBytes(Charset.defaultCharset());
         try {
             IvParameterSpec spec = new IvParameterSpec(iv);
             SecretKeySpec secretKey = new SecretKeySpec(secretKeyTemp.getEncoded(),"AES");
