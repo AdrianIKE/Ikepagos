@@ -32,7 +32,7 @@ public class IkePagoServicio {
     //Llaves en encripatcion
     private static final String key = "Ik34slst3ncl4Pnt0cOm2712";
     private static final String salt = "Ik34slst3ncl4Pnt0cOm0troLado9805";
-    private final String url = "https://www.respaldat360.com";
+    private final String url = "https://www.respaldat360.com/";
     private SecretKey secretKeyTemp;
     
 
