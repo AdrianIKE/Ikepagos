@@ -9,7 +9,8 @@ import com.ikeasistencia.ikepagos.Entidades.Beneficiary;
 import com.ikeasistencia.ikepagos.Repositorios.BeneficiaryRepository;
 import com.ikeasistencia.ikepagos.Repositorios.OrderRepository;
 
-
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.spec.KeySpec;
 import java.sql.Date;
@@ -32,7 +33,7 @@ public class IkePagoServicio {
     //Llaves en encripatcion
     private static final String key = "Ik34slst3ncl4Pnt0cOm2712";
     private static final String salt = "Ik34slst3ncl4Pnt0cOm0troLado9805";
-    private final String url = "https://www.respaldat360.com/";
+    private final String url = "https://sitio-respaldat360.dev-pruebas.com/";
     private SecretKey secretKeyTemp;
     
 
@@ -70,16 +71,25 @@ public class IkePagoServicio {
         Float total = Float.valueOf(datos.get("total").getAsString());
         Date validity_start = Date.valueOf(val_start.getAsString());
         Date validity_end = Date.valueOf(val_end.getAsString());
-        
+        Integer validador = 0;
         
         Order pago = new Order(return_url, id_pay , validity_start,validity_end,total);
+        try{
+            Order validation = orderRepository.findByIdPay(id_pay);
+            validador = validation.getActive();
+        }catch (Exception e){
+            validador = 0;
+        }
+        
+        if(validador == 1){
+            return 0;
+        }
         Order res = orderRepository.save(pago);
         Integer id_order = res.getId_order();
         
+
         
         //Configuracion array de  beneficiarios
-        
-        
         JsonElement beneficiariesAux = datos.get("beneficiaries");
         JsonArray beneficiaries = json.fromJson(beneficiariesAux, JsonArray.class);
         guardarDatosBeneficiario(beneficiaries,id_order);
@@ -150,12 +160,12 @@ public class IkePagoServicio {
     }
 
 
-    public String construccionLink(HashMap<String,Object> datos){
+    public String construccionLink(HashMap<String,Object> datos) throws UnsupportedEncodingException{
         String id_pay = datos.get("id_pay").toString();
         String validity_start = datos.get("validity_start").toString();
         String preHash = validity_start + id_pay;
         String encriptado = getAES(preHash);
-        String urlFinal = this.url + "checkout?rut="+encriptado;
+        String urlFinal = this.url + "checkout?rut="+URLEncoder.encode(encriptado, "UTF-8");
         return urlFinal;
     }
 

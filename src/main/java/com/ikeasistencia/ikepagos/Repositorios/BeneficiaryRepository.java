@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface BeneficiaryRepository  extends  JpaRepository<Beneficiary,Integer> {
 
-    @Query(value="SELECT * FROM beneficiary order by id_beneficiary desc limit 1;",nativeQuery=true)
+    @Query(value="SELECT * FROM beneficiary_ikepagos order by id_beneficiary desc limit 1;",nativeQuery=true)
     Beneficiary findLast();
     
 }

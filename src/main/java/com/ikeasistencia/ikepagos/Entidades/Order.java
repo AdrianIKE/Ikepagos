@@ -10,14 +10,15 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "orders_ikepagos")
 public class Order {
 
     @Id 
     @Column(name = "id_order")
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int id_order;
-    private String id_pay;
+    @Column(name = "id_pay")
+    private String idPay;
     private String return_url;
     private Date validity_start;
     private Date validity_end;
@@ -32,7 +33,7 @@ public class Order {
                 Float total) {
                     
         this.return_url = return_url;
-        this.id_pay = id_pay;
+        this.idPay = id_pay;
         this.validity_start = validity_start;
         this.validity_end = validity_end;
         this.total = total;
@@ -48,12 +49,12 @@ public class Order {
         this.id_order = id_order;
     }
 
-    public String getId_pay() {
-        return id_pay;
+    public String getIdPay() {
+        return idPay;
     }
-    
-    public void setId_pay(String id_pay) {
-        this.id_pay = id_pay;
+
+    public void setIdPay(String idPay) {
+        this.idPay = idPay;
     }
     
     public Date getRegistred_date() {
@@ -109,7 +110,7 @@ public class Order {
 
     @Override
     public String toString() {
-        return "Order [id_order=" + id_order + ", id_pay=" + id_pay + ", return_url=" + return_url + ", validity_start="
+        return "Order [id_order=" + id_order + ", id_pay=" + idPay + ", return_url=" + return_url + ", validity_start="
                 + validity_start + ", validity_end=" + validity_end + ", total=" + total + ", active=" + active
                 + ", registred_date=" + registred_date + "]";
     }

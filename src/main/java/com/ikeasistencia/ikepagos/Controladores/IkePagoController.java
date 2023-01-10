@@ -40,11 +40,16 @@ public class IkePagoController {
 
         // Construccion de json para el Front
 
+        if(id_transaccion == 0){
+            response.put("transaction_id",String.valueOf(id_transaccion));
+            response.put("Error", "This id_pay already exists");
+            return response;
+        }
+
         response.put("transaction_id",String.valueOf(id_transaccion));
 
         response.put("payament_url", ikePagoServicio.construccionLink(datosPago));
 
-        response.put("return_url", datosPago.get("return_url").toString());
 
         return response; 
     }
