@@ -23,8 +23,8 @@ public class IkePagoController {
     private IkePagoServicio ikePagoServicio;
 
 
-    @PostMapping("/api/pagoNuevo")
-    public Map<String,String> pagoNuevo (@RequestBody String body) throws Exception {
+    @PostMapping("/api/inicioPago")
+    public Map<String,String> inicioPago (@RequestBody String body) throws Exception {
         
         //Definimos la respuesta vacia.
         HashMap<String,String> response = new HashMap<String,String>();
@@ -33,20 +33,18 @@ public class IkePagoController {
         Gson request = new Gson();
         JsonReader reader = new JsonReader(new StringReader(body));
         reader.setLenient(true);
-        HashMap<String,Object> datosCorreo = request.fromJson(reader, HashMap.class);
+        HashMap<String,Object> datosPago = request.fromJson(reader, HashMap.class);
 
         //Inicializar el Servicio con sus datos correspondientes y guardarlos 
-        Integer id_transaccion = ikePagoServicio.guardarDatos(datosCorreo);
+        Integer id_transaccion = ikePagoServicio.saveOrder(body);
 
         // Construccion de json para el Front
 
-        response.put("id_transaccion",String.valueOf(id_transaccion));
+        response.put("transaction_id",String.valueOf(id_transaccion));
 
-        response.put("url_pago", ikePagoServicio.construccionLink(datosCorreo));
+        response.put("payament_url", ikePagoServicio.construccionLink(datosPago));
 
-        response.put("url_retorno", datosCorreo.get("url_retorno").toString());
-
-        response.put("url_notificacion", datosCorreo.get("url_negocio").toString());
+        response.put("return_url", datosPago.get("return_url").toString());
 
         return response; 
     }

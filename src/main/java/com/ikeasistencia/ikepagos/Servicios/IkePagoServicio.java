@@ -1,9 +1,14 @@
 package com.ikeasistencia.ikepagos.Servicios;
 
-import com.ikeasistencia.ikepagos.Entidades.Pago;
-import com.ikeasistencia.ikepagos.Entidades.Beneficiario;
-import com.ikeasistencia.ikepagos.Repositorios.BeneficiarioRepository;
-import com.ikeasistencia.ikepagos.Repositorios.PagoRepository;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.ikeasistencia.ikepagos.Entidades.Order;
+import com.ikeasistencia.ikepagos.Entidades.Beneficiary;
+import com.ikeasistencia.ikepagos.Repositorios.BeneficiaryRepository;
+import com.ikeasistencia.ikepagos.Repositorios.OrderRepository;
+
 
 import java.nio.charset.Charset;
 import java.security.spec.KeySpec;
@@ -24,91 +29,133 @@ import org.springframework.stereotype.Service;
 @Service
 public class IkePagoServicio {
     
-
+    //Llaves en encripatcion
     private static final String key = "Ik34slst3ncl4Pnt0cOm2712";
     private static final String salt = "Ik34slst3ncl4Pnt0cOm0troLado9805";
-
+    private final String url = "https://www.respaldat360.com";
     private SecretKey secretKeyTemp;
+    
 
+    //Conexion hacia la tabla pago
     @Autowired
-    private PagoRepository pagoRepository;
+    private OrderRepository orderRepository;
 
+    //Conexcion hacia la tabla beneficiario
     @Autowired
-    private BeneficiarioRepository beneficiarioRepository;
+    private BeneficiaryRepository beneficiaryRepository;
 
     public IkePagoServicio(){
         SecretKeyFactory factory;
         KeySpec keySpec;
         try {
             factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-            keySpec = new PBEKeySpec(key.toCharArray(), salt.getBytes(), 65536, 32);
+            keySpec = new PBEKeySpec(key.toCharArray(), salt.getBytes(), 65536, 256);
             secretKeyTemp = factory.generateSecret(keySpec);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     
-    public Integer guardarDatos (HashMap<String,Object> datos){
-    
-        // Datos proporcionados por el comercio
-        String url_retorno = datos.get("url_retorno").toString();
-        String url_negocio = datos.get("url_negocio").toString();
-        String id_pago = datos.get("id_pago").toString();
-
-        //Datos traidos por parte de Ike
-        Integer cuenta_ike = Integer.parseInt(datos.get("cuenta_ike").toString());
-
-        //Datos del comprador
-        Date validity_start = Date.valueOf(datos.get("validity_start").toString());
-        Date validity_end = Date.valueOf(datos.get("validity_end").toString());
-
-        //Datos de lo adquirido
-        String lineItem_name = datos.get("lineitem_name").toString();
-        String lineitem_price = datos.get("lineitem_price").toString();
-        String billing_name = datos.get("billing_name").toString();
+    public Integer saveOrder (String body){
         
-        //Datos de pago
-        Date birth_date =  Date.valueOf(datos.get("birth_date").toString());;
-
+        //Conversion del cuerpo de peticion
+        Gson json = new Gson();
+        JsonObject datos = json.fromJson(body,JsonObject.class);
+        JsonElement val_start = datos.get("validity_start");
+        JsonElement val_end = datos.get("validity_end");
         
-        //Datos Beneficiario
-        String nameB = datos.get("nameB").toString();;
-        String appB = datos.get("appB").toString();
-        String apmB = datos.get("apmB").toString();
-        String emailB = datos.get("emailB").toString();
-        String billing_phoneB = datos.get("billing_phoneB").toString();
-        String sexoB = datos.get("sexoB").toString();
-            
-        //Url donde se construira el link de pago
-        String url = datos.get("url").toString();
-
-        //Definicion del pago nuevo
-
+        // Datos generales para el pago
+        String id_pay = datos.get("id_pay").getAsString();
+        String return_url = datos.get("return_url").getAsString();
+        Float total = Float.valueOf(datos.get("total").getAsString());
+        Date validity_start = Date.valueOf(val_start.getAsString());
+        Date validity_end = Date.valueOf(val_end.getAsString());
         
-        Pago pago = new Pago(url_retorno,url_negocio,id_pago, cuenta_ike,validity_start,
-        validity_end, lineItem_name, lineitem_price, billing_name, birth_date,url);
-
-        Pago res = pagoRepository.save(pago);
-
+        
+        Order pago = new Order(return_url, id_pay , validity_start,validity_end,total);
+        Order res = orderRepository.save(pago);
+        Integer id_order = res.getId_order();
+        
+        
+        //Configuracion array de  beneficiarios
+        
+        
+        JsonElement beneficiariesAux = datos.get("beneficiaries");
+        JsonArray beneficiaries = json.fromJson(beneficiariesAux, JsonArray.class);
+        guardarDatosBeneficiario(beneficiaries,id_order);
+        
         
 
-        Integer id_t = res.getId();
-
-        Beneficiario beneficiario = new Beneficiario(nameB, appB, apmB, emailB, billing_phoneB, sexoB,id_t);
-        
-        beneficiarioRepository.save(beneficiario);
-
-        return id_t;
+        return id_order;
 
     }
 
+    public Integer guardarDatosBeneficiario (JsonArray beneficiaries, Integer id_order){
+        
+        Gson json = new Gson();
+        for (JsonElement beneficiary : beneficiaries) {
+            JsonObject aux = json.fromJson(beneficiary,JsonObject.class);
+            JsonElement birth_date = aux.get("birth_date");
+            Integer ike_account =  Integer.valueOf(aux.get("ike_account").getAsString());
+            String key_value = getKeyValue(ike_account);
+            Beneficiary b = new Beneficiary(
+                aux.get("name").getAsString(), 
+                aux.get("last_name_1").getAsString(), 
+                aux.get("last_name_2").getAsString(), 
+                aux.get("email").getAsString(), 
+                aux.get("billing_phone").getAsString(), 
+                Date.valueOf(birth_date.getAsString()), 
+                aux.get("line_item_name").getAsString(), 
+                Float.valueOf(aux.get("line_item_price").toString()), 
+                key_value, 
+                id_order,
+                ike_account
+            );
+            beneficiaryRepository.save(b);
+        }
+        return 1;
+    }
+
+
+    public String getKeyValue(Integer ike_account){
+        Integer last_id =  beneficiaryRepository.findLast().getId_beneficiary();
+        String folio = "";
+        if(ike_account == 2458){
+            folio = "LHF0000"+last_id;
+            return folio;
+        } else if(ike_account == 2459){
+            folio = "LHI0000"+last_id;
+            return folio;
+        } else if(ike_account == 2514){
+            folio = "LDB0000"+last_id;
+            return folio;
+        } else if(ike_account == 2515){
+            folio = "LDP0000"+last_id;
+            return folio;
+        } else if(ike_account == 2570){
+            folio = "RAP0000"+last_id;
+            return folio;
+        } else if(ike_account == 2571){
+            folio = "RGE0000"+last_id;
+            return folio;
+        } else if(ike_account == 2572){
+            folio = "RD0000"+last_id;
+            return folio;
+        } else if(ike_account == 2573 || ike_account ==2574 || ike_account ==2575 || ike_account ==2576){
+            folio = "RGF0000"+last_id;
+            return folio;
+        }
+        return folio;
+
+    }
+
+
     public String construccionLink(HashMap<String,Object> datos){
-        String cuenta_ike = datos.get("cuenta_ike").toString();
-        String id_pago = datos.get("id_pago").toString();
-        String url = datos.get("url").toString();
-        String preHash = cuenta_ike + id_pago;
+        String id_pay = datos.get("id_pay").toString();
+        String validity_start = datos.get("validity_start").toString();
+        String preHash = validity_start + id_pay;
         String encriptado = getAES(preHash);
-        String urlFinal = url + "checkout?rut="+encriptado;
+        String urlFinal = this.url + "checkout?rut="+encriptado;
         return urlFinal;
     }
 
