@@ -1,5 +1,6 @@
 package com.ikeasistencia.ikepagos.Entidades;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,7 +29,7 @@ public class Beneficiary {
         private Float line_item_price;
         private String key_value;
         private Integer active;
-        private Date registred_date;
+        private Timestamp registred_date;
         
         private Integer id_order;
 
@@ -47,7 +48,7 @@ public class Beneficiary {
                 this.line_item_price = line_item_price;
                 this.key_value = key_value;
                 this.active = 1;
-                this.registred_date = new Date(System.currentTimeMillis());
+                this.registred_date = new Timestamp(System.currentTimeMillis());
                 this.id_order = id_order;
                 this.ike_account = ike_account;
         }
@@ -144,11 +145,11 @@ public class Beneficiary {
             this.active = active;
         }
 
-        public Date getRegistred_date() {
+        public Timestamp getRegistred_date() {
             return registred_date;
         }
 
-        public void setRegistred_date(Date registred_date) {
+        public void setRegistred_date(Timestamp registred_date) {
             this.registred_date = registred_date;
         }
 

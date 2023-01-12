@@ -1,5 +1,6 @@
 package com.ikeasistencia.ikepagos.Entidades;
 
+import java.sql.Timestamp;
 import java.sql.Date;
 
 import javax.persistence.Column;
@@ -33,7 +34,7 @@ public class Order_Pay {
     public String card_type;
     public String charge_type;
     public Integer active;
-    public Date registred_date;
+    public Timestamp registred_date;
     
 
     public Integer id_order;
@@ -42,11 +43,11 @@ public class Order_Pay {
         return charge_type;
     }
 
-    public Date getRegistred_date() {
+    public Timestamp getRegistred_date() {
         return registred_date;
     }
 
-    public void setRegistred_date(Date registred_date) {
+    public void setRegistred_date(Timestamp registred_date) {
         this.registred_date = registred_date;
     }
 

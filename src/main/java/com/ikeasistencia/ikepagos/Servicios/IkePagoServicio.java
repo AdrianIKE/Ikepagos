@@ -72,8 +72,9 @@ public class IkePagoServicio {
         Date validity_start = Date.valueOf(val_start.getAsString());
         Date validity_end = Date.valueOf(val_end.getAsString());
         Integer validador = 0;
+        Integer recurrence = Integer.valueOf(datos.get("recurrence").getAsString());
         
-        Order pago = new Order(return_url, id_pay , validity_start,validity_end,total);
+        Order pago = new Order(return_url, id_pay , validity_start,validity_end,total,recurrence);
         try{
             Order validation = orderRepository.findByIdPay(id_pay);
             validador = validation.getActive();
@@ -131,28 +132,28 @@ public class IkePagoServicio {
         Integer last_id =  beneficiaryRepository.findLast().getId_beneficiary();
         String folio = "";
         if(ike_account == 2458){
-            folio = "LHF0000"+last_id;
+            folio = "HBLHF"+last_id;
             return folio;
         } else if(ike_account == 2459){
-            folio = "LHI0000"+last_id;
+            folio = "HBLHI"+last_id;
             return folio;
         } else if(ike_account == 2514){
-            folio = "LDB0000"+last_id;
+            folio = "HBLDB"+last_id;
             return folio;
         } else if(ike_account == 2515){
-            folio = "LDP0000"+last_id;
+            folio = "HBLDP"+last_id;
             return folio;
         } else if(ike_account == 2570){
-            folio = "RAP0000"+last_id;
+            folio = "HBRAP"+last_id;
             return folio;
         } else if(ike_account == 2571){
-            folio = "RGE0000"+last_id;
+            folio = "HBRGE"+last_id;
             return folio;
         } else if(ike_account == 2572){
-            folio = "RD0000"+last_id;
+            folio = "HBRD"+last_id;
             return folio;
         } else if(ike_account == 2573 || ike_account ==2574 || ike_account ==2575 || ike_account ==2576){
-            folio = "RGF0000"+last_id;
+            folio = "HBRGF"+last_id;
             return folio;
         }
         return folio;

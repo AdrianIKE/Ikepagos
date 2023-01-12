@@ -1,6 +1,7 @@
 package com.ikeasistencia.ikepagos.Entidades;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,13 +25,16 @@ public class Order {
     private Date validity_end;
     private Float total;
     private Integer active;
-    private Date registred_date;
+    private Timestamp registred_date;
+    private Integer recurrence;
 
+
+    
 
     public Order(){}
     
     public Order(String return_url, String id_pay , Date validity_start,Date validity_end, 
-                Float total) {
+                Float total,Integer recurrence) {
                     
         this.return_url = return_url;
         this.idPay = id_pay;
@@ -38,7 +42,16 @@ public class Order {
         this.validity_end = validity_end;
         this.total = total;
         this.active = 1;
-        this.registred_date = new Date(System.currentTimeMillis());
+        this.registred_date = new Timestamp(System.currentTimeMillis());
+        this.recurrence = recurrence;
+    }
+
+    public Integer getRecurrence() {
+        return recurrence;
+    }
+
+    public void setRecurrence(Integer recurrence) {
+        this.recurrence = recurrence;
     }
 
     public int getId_order() {
@@ -57,11 +70,11 @@ public class Order {
         this.idPay = idPay;
     }
     
-    public Date getRegistred_date() {
+    public Timestamp getRegistred_date() {
         return registred_date;
     }
 
-    public void setRegistred_date(Date registred_date) {
+    public void setRegistred_date(Timestamp registred_date) {
         this.registred_date = registred_date;
     }
 
