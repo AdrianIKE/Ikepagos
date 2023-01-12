@@ -18,7 +18,7 @@ import com.google.gson.stream.JsonReader;
 
 @RestController
 public class IkePagoController {
-
+    
     @Autowired 
     private IkePagoServicio ikePagoServicio;
 
@@ -26,7 +26,7 @@ public class IkePagoController {
     @PostMapping("/api/inicioPago")
     public Map<String,String> inicioPago (@RequestBody String body) throws Exception {
         
-        //Definimos la respuesta vacia.
+         //Definimos la respuesta vacia.
         HashMap<String,String> response = new HashMap<String,String>();
         
         //Obtencion de los datos Json en la variable datosCorreo
@@ -43,6 +43,10 @@ public class IkePagoController {
         if(id_transaccion == 0){
             response.put("transaction_id",String.valueOf(id_transaccion));
             response.put("Error", "This id_pay already exists");
+            return response;
+        }else if(id_transaccion == 503){
+            response.put("transaction_id",String.valueOf(id_transaccion));
+            response.put("Error", "This ike_account isn't available");
             return response;
         }
 

@@ -27,14 +27,13 @@ public class Order {
     private Integer active;
     private Timestamp registred_date;
     private Integer recurrence;
+    private Integer periodicity;
 
-
-    
 
     public Order(){}
     
     public Order(String return_url, String id_pay , Date validity_start,Date validity_end, 
-                Float total,Integer recurrence) {
+                Float total,Integer recurrence,Integer periodicity) {
                     
         this.return_url = return_url;
         this.idPay = id_pay;
@@ -44,6 +43,15 @@ public class Order {
         this.active = 1;
         this.registred_date = new Timestamp(System.currentTimeMillis());
         this.recurrence = recurrence;
+        this.periodicity = periodicity;
+    }
+
+    public Integer getPeriodicity() {
+        return periodicity;
+    }
+
+    public void setPeriodicity(Integer periodicity) {
+        this.periodicity = periodicity;
     }
 
     public Integer getRecurrence() {

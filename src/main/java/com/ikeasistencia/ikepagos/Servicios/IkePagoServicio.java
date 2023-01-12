@@ -14,6 +14,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.spec.KeySpec;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 
@@ -73,8 +74,9 @@ public class IkePagoServicio {
         Date validity_end = Date.valueOf(val_end.getAsString());
         Integer validador = 0;
         Integer recurrence = Integer.valueOf(datos.get("recurrence").getAsString());
+        Integer periodicity = Integer.valueOf(datos.get("periodicity").getAsString());
         
-        Order pago = new Order(return_url, id_pay , validity_start,validity_end,total,recurrence);
+        Order pago = new Order(return_url, id_pay , validity_start,validity_end,total,recurrence,periodicity);
         try{
             Order validation = orderRepository.findByIdPay(id_pay);
             validador = validation.getActive();
@@ -93,9 +95,13 @@ public class IkePagoServicio {
         //Configuracion array de  beneficiarios
         JsonElement beneficiariesAux = datos.get("beneficiaries");
         JsonArray beneficiaries = json.fromJson(beneficiariesAux, JsonArray.class);
-        guardarDatosBeneficiario(beneficiaries,id_order);
+        Integer ben = guardarDatosBeneficiario(beneficiaries,id_order);
         
-        
+        if(ben == 0){
+            res.setActive(0);
+            orderRepository.save(res);
+            return 503;
+        }
 
         return id_order;
 
@@ -104,10 +110,25 @@ public class IkePagoServicio {
     public Integer guardarDatosBeneficiario (JsonArray beneficiaries, Integer id_order){
         
         Gson json = new Gson();
+        ArrayList<Integer> cuentas  = new ArrayList<Integer>();;
+        cuentas.add(2458);
+        cuentas.add(2459);
+        cuentas.add(2514);
+        cuentas.add(2515);
+        cuentas.add(2570);
+        cuentas.add(2571);
+        cuentas.add(2572);
+        cuentas.add(2573);
+        cuentas.add(2574);
+        cuentas.add(2575);
+        cuentas.add(2576);
         for (JsonElement beneficiary : beneficiaries) {
             JsonObject aux = json.fromJson(beneficiary,JsonObject.class);
             JsonElement birth_date = aux.get("birth_date");
             Integer ike_account =  Integer.valueOf(aux.get("ike_account").getAsString());
+            if(!cuentas.contains(ike_account)){
+                return 0;
+            }
             String key_value = getKeyValue(ike_account);
             Beneficiary b = new Beneficiary(
                 aux.get("name").getAsString(), 
@@ -166,7 +187,7 @@ public class IkePagoServicio {
         String validity_start = datos.get("validity_start").toString();
         String preHash = validity_start + id_pay;
         String encriptado = getAES(preHash);
-        String urlFinal = this.url + "checkout?rut="+URLEncoder.encode(encriptado, "UTF-8");
+        String urlFinal = this.url + "checkout?id="+URLEncoder.encode(encriptado, "UTF-8");
         return urlFinal;
     }
 
