@@ -39,6 +39,13 @@ public class IkePagoController {
         Integer id_transaccion = ikePagoServicio.saveOrder(body);
 
         // Construccion de json para el Front
+        Boolean pagos_correspondientes = ikePagoServicio.pagosCorrespondientes(body);
+
+        if(!pagos_correspondientes){
+            response.put("transaction_id",String.valueOf(503));
+            response.put("Error", "The amounts of the transaction are not equal.");
+            return response;
+        }
 
         if(id_transaccion == 0){
             response.put("transaction_id",String.valueOf(id_transaccion));

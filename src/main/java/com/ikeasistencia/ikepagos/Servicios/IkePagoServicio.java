@@ -4,11 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
 import com.ikeasistencia.ikepagos.Entidades.Order;
 import com.ikeasistencia.ikepagos.Entidades.Beneficiary;
 import com.ikeasistencia.ikepagos.Repositorios.BeneficiaryRepository;
 import com.ikeasistencia.ikepagos.Repositorios.OrderRepository;
 
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -98,8 +100,7 @@ public class IkePagoServicio {
         Integer ben = guardarDatosBeneficiario(beneficiaries,id_order);
         
         if(ben == 0){
-            res.setActive(0);
-            orderRepository.save(res);
+
             return 503;
         }
 
@@ -221,6 +222,27 @@ public class IkePagoServicio {
         }
 
         return null;
+    }
+
+    public Boolean pagosCorrespondientes(String body){
+        Gson json = new Gson();
+        JsonReader reader = new JsonReader(new StringReader(body));
+        reader.setLenient(true);
+        JsonObject request = json.fromJson(reader, JsonObject.class);
+        Float total = request.get("total").getAsFloat();
+        JsonArray beneficiaries = request.get("beneficiaries").getAsJsonArray();
+        Float comparacion = Float.valueOf("0.00");
+        for (JsonElement jsonElement : beneficiaries) {
+            JsonObject aux = jsonElement.getAsJsonObject();
+            comparacion += aux.get("line_item_price").getAsFloat();
+        }
+        System.out.println(total);
+        System.out.println(comparacion);
+        if(total.equals(comparacion)){
+            return true;
+        }
+
+        return false;
     }
 
 

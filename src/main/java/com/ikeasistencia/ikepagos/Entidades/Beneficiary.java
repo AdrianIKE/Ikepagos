@@ -8,6 +8,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name="beneficiary_ikepagos")
@@ -22,10 +25,14 @@ public class Beneficiary {
         private String name;
         private String last_name_1;
         private String last_name_2;
+        @Email
         private String email;
+        @Size(min=9,max=12)
         private String billing_phone;
         private Date birth_date;
+        @Size(min=5)
         private String line_item_name;
+        @Digits(integer=5, fraction=2)
         private Float line_item_price;
         private String key_value;
         private Integer active;

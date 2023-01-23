@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Digits;
 
 @Entity
 @Table(name = "orders_ikepagos")
@@ -23,6 +24,7 @@ public class Order {
     private String return_url;
     private Date validity_start;
     private Date validity_end;
+    @Digits(integer=5, fraction=2)
     private Float total;
     private Integer active;
     private Timestamp registred_date;
@@ -40,7 +42,7 @@ public class Order {
         this.validity_start = validity_start;
         this.validity_end = validity_end;
         this.total = total;
-        this.active = 1;
+        this.active = 0;
         this.registred_date = new Timestamp(System.currentTimeMillis());
         this.recurrence = recurrence;
         this.periodicity = periodicity;
