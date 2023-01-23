@@ -28,7 +28,7 @@ public class IkePagoController {
         
          //Definimos la respuesta vacia.
         HashMap<String,String> response = new HashMap<String,String>();
-        
+        Integer id_transaccion = 0;
         //Obtencion de los datos Json en la variable datosCorreo
         Gson request = new Gson();
         JsonReader reader = new JsonReader(new StringReader(body));
@@ -36,8 +36,13 @@ public class IkePagoController {
         HashMap<String,Object> datosPago = request.fromJson(reader, HashMap.class);
 
         //Inicializar el Servicio con sus datos correspondientes y guardarlos 
-        Integer id_transaccion = ikePagoServicio.saveOrder(body);
-
+        try{
+            id_transaccion = ikePagoServicio.saveOrder(body);
+        }catch(Exception e){
+            response.put("transaction_id",String.valueOf(503));
+            response.put("Error", e.getMessage());
+            return response;
+        }
         // Construccion de json para el Front
         Boolean pagos_correspondientes = ikePagoServicio.pagosCorrespondientes(body);
 

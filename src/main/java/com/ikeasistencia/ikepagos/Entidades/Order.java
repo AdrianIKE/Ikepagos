@@ -10,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.Digits;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "orders_ikepagos")
@@ -20,6 +21,7 @@ public class Order {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int id_order;
     @Column(name = "id_pay")
+    @Size(min=5)
     private String idPay;
     private String return_url;
     private Date validity_start;

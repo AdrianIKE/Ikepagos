@@ -26,6 +26,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,7 +61,8 @@ public class IkePagoServicio {
         }
     }
     
-    public Integer saveOrder (String body){
+    @Transactional(rollbackOn = Exception.class)
+    public Integer saveOrder (String body) throws Exception {
         
         //Conversion del cuerpo de peticion
         Gson json = new Gson();
@@ -74,19 +76,19 @@ public class IkePagoServicio {
         Float total = Float.valueOf(datos.get("total").getAsString());
         Date validity_start = Date.valueOf(val_start.getAsString());
         Date validity_end = Date.valueOf(val_end.getAsString());
-        Integer validador = 0;
+        String validador = "";
         Integer recurrence = Integer.valueOf(datos.get("recurrence").getAsString());
         Integer periodicity = Integer.valueOf(datos.get("periodicity").getAsString());
         
         Order pago = new Order(return_url, id_pay , validity_start,validity_end,total,recurrence,periodicity);
         try{
             Order validation = orderRepository.findByIdPay(id_pay);
-            validador = validation.getActive();
+            validador = validation.getIdPay();
         }catch (Exception e){
-            validador = 0;
+            validador = "";
         }
         
-        if(validador == 1){
+        if(validador != ""){
             return 0;
         }
         Order res = orderRepository.save(pago);
@@ -108,7 +110,7 @@ public class IkePagoServicio {
 
     }
 
-    public Integer guardarDatosBeneficiario (JsonArray beneficiaries, Integer id_order){
+    public Integer guardarDatosBeneficiario (JsonArray beneficiaries, Integer id_order) throws Exception{
         
         Gson json = new Gson();
         ArrayList<Integer> cuentas  = new ArrayList<Integer>();;
@@ -236,8 +238,6 @@ public class IkePagoServicio {
             JsonObject aux = jsonElement.getAsJsonObject();
             comparacion += aux.get("line_item_price").getAsFloat();
         }
-        System.out.println(total);
-        System.out.println(comparacion);
         if(total.equals(comparacion)){
             return true;
         }
